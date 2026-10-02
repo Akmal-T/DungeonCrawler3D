@@ -232,6 +232,19 @@ git status
 4. **Type inference strict in GDScript** → use explicit `: Type` if inference fails (e.g., `var is_door: bool = ...`)
 5. **StaticBody3D required for collision** → mesh alone doesn't collide with CharacterBody3D
 6. **Area3D uses BoxShape3D directly** (not ConcavePolygonShape) for triggers
+7. **GDScript type inference with `get_nodes_in_group()`** → returns untyped Array, elements are `Variant`. Accessing `.global_position` etc. produces `Variant`, so `var x := enemy.position.length()` fails to infer. **Fix:** use explicit types (`var dist: float = ...`) or cast (`var e := enemy as Node3D`).
+8. **Attack input bug (fixed):** Original thin raycast (2 units) was too short and required exact facing. Now uses group-based detection (`enemies` group) with 3-unit range + camera-direction aim + 0.5s cooldown. Input: left mouse click OR F key.
+9. **Unicode em-dash in comments** → can cause parse errors. Keep comments ASCII-only.
+
+---
+
+## Attack System (Fase 3)
+
+- **Input:** Left mouse click OR `F` key
+- **Range:** 3 units, cooldown 0.5s
+- **Direction:** Player auto-faces camera forward direction
+- **Detection:** All enemies in `enemies` group within range, in front (dot > 0.3)
+- **Effect:** `enemy.die()` → drops upgrade pickup
 
 ---
 
