@@ -22,9 +22,26 @@
 - **UI:** HUD (level, score, HP bar), Game Over screen (restart button)
 - **Game Loop:** Die → Game Over → Restart to Level 1
 
+### ✅ Completed: Fase 3 — Enemies & Combat
+
+**New Systems:**
+- **Enemy AI** (`enemy.gd`): CharacterBody3D, chase player within detection_range (15), contact damage
+- **Enemy Spawning:** Spawn in non-start/non-exit rooms, count = `1 + (level-1)/2`, speed/damage scale with level
+- **Player Melee Attack** (`player.gd`): Raycast 2 units forward from facing direction, mouse click triggers, 0.5s cooldown, calls `enemy.die()`
+- **Upgrade Pickups** (`upgrade_pickup.gd`): 4 types — health_potion (heal 20), speed_boost (+0.1x), damage_boost (+5), max_health (+20)
+- **Enemy Drops:** On death, spawn upgrade pickup at enemy position
+- **Player Group:** Player tagged in "player" group for enemy targeting
+- **Enemy Visual:** Red emissive sphere (placeholder, replace with Quaternius Blob later)
+
+**Combat Loop:**
+1. Enemy detects player within 15 units → chases
+2. Within 1.5 units → attacks (damage = 10 + level*2, 0.5s delay)
+3. Player clicks mouse → raycast hits enemy → enemy dies → drops pickup
+4. Player walks over pickup → applies buff
+
 **Assets Imported:**
 - ✅ Kenney Mini Dungeon (30 GLB models: wall, floor, gate, column, barrel, pot, chest, etc.)
-- ✅ Quaternius Ultimate Monsters (54 GLTF: Blob/Big/Flying categories) — **ready for Fase 3**
+- ✅ Quaternius Ultimate Monsters (54 GLTF: Blob/Big/Flying categories) — **available, currently enemy uses placeholder sphere**
 - ✅ Quaternius RPG Characters (6 GLTF: Warrior, Ranger, Wizard, etc.) — **ready for player upgrade**
 
 ---
@@ -40,13 +57,19 @@ D:\GAME\BuildingAGame\
 │
 ├── Scenes/
 │   ├── Dungeon/
-│   │   ├── dungeon_manager.gd    ← Grid generation, room spawning, level transition
+│   │   ├── dungeon_manager.gd    ← Grid generation, room spawning, level transition, enemy spawning
 │   │   ├── door.gd / door.tscn   ← Area3D trigger (normal vs exit)
 │   │   ├── world.gd / world.tscn ← Root scene (main_scene)
 │   │
 │   ├── Player/
-│   │   ├── player.gd / player.tscn         ← CharacterBody3D (placeholder capsule)
+│   │   ├── player.gd / player.tscn         ← CharacterBody3D (placeholder capsule) + melee attack
 │   │   └── camera_orbit.gd                 ← Third-person orbit camera
+│   │
+│   ├── Enemies/
+│   │   └── enemy.gd / enemy.tscn           ← CharacterBody3D, chase AI, contact damage
+│   │
+│   ├── Upgrades/
+│   │   └── upgrade_pickup.gd / upgrade_pickup.tscn  ← Area3D pickups (4 buff types)
 │   │
 │   └── UI/
 │       ├── hud.gd / hud.tscn               ← Level, Score, HP
@@ -110,15 +133,15 @@ D:\GAME\BuildingAGame\
 - Props spawn position (may clip walls if unlucky RNG)
 
 ❌ **Not Yet Implemented:**
-- **Enemies / Combat** (Fase 3)
-- **Upgrades / Pickups** (chest, coin, potion models ready but not scripted)
-- **Player model** (still placeholder capsule — Quaternius RPG ready to replace)
+- **Visual models** (enemies = placeholder sphere, player = placeholder capsule — real models ready)
 - **Audio** (no SFX/music)
 - **Minimap** (would be useful for dungeon exploration)
+- **Enemy health** (currently die in 1 hit — no HP bar)
+- **Multiple enemy types/tiers** (all enemies identical currently)
 
 ---
 
-## Next Steps (Fase 3 — Enemies & Combat)
+## Next Steps (Fase 3 — Enemies & Combat) — ✅ COMPLETED
 
 **Plan:**
 1. **Enemy AI:**
@@ -142,9 +165,16 @@ D:\GAME\BuildingAGame\
    - Enemy count per room: `1 + level / 2`
    - Enemy HP/damage scaling: `base * (1 + level * 0.2)`
 
-**Assets Ready:**
-- Quaternius Blob monsters (33 models, small/cute, good for starter enemies)
-- Kenney chest.glb, coin.glb, potion.glb (upgrade pickups)
+---
+
+## Next Steps (Fase 4 — Polish & Visual Upgrade)
+
+**Plan:**
+1. **Player Model:** Replace placeholder capsule dengan Quaternius RPG (Warrior/Wizard)
+2. **Enemy Models:** Replace red sphere dengan Quaternius Blob (GreenBlob, Dog, Chicken)
+3. **Combat Polish:** Add hit feedback (screen shake, particles), sound SFX
+4. **Pickups:** Replace sphere dengan Kenney chest/coin/potion models
+5. **Audio:** Sound manager + SFX for footsteps, hits, pickup
 
 ---
 

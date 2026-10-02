@@ -1,5 +1,37 @@
 # Development Log
 
+## 2026-10-03 — Fase 3: Enemies & Combat
+
+### Summary
+Implemented enemy AI, player melee combat, dan upgrade drop system.
+
+### What Works
+✅ Enemy AI: chase player (detection 15 units), contact damage (10 + level*2)  
+✅ Enemy spawning: non-start/non-exit rooms, count = 1 + (level-1)/2  
+✅ Player melee attack: raycast 2 units, mouse click, 0.5s cooldown  
+✅ Enemy death drops upgrade pickup  
+✅ 4 upgrade types: health_potion, speed_boost, damage_boost, max_health  
+✅ Player in "player" group for enemy targeting  
+
+### Known Issues
+⚠️ Enemy uses placeholder red sphere (Quaternius Blob models ready to swap)  
+⚠️ Enemy dies in 1 hit (no HP system yet)  
+⚠️ No hit feedback (screen shake/particles) yet  
+
+### Files Created
+```
+Scenes/Enemies/enemy.gd / enemy.tscn           (chase AI + contact damage)
+Scenes/Upgrades/upgrade_pickup.gd / .tscn      (4 buff types)
+Scenes/Player/player.gd                        (updated: melee attack)
+Scenes/Dungeon/dungeon_manager.gd              (updated: enemy spawning)
+```
+
+### Git
+- Commit: `c2a6e2e` Fase 3: Enemies & Combat system
+- Pushed to origin/main
+
+---
+
 ## 2026-10-03 — Fase 2: Dungeon Room System (MVP)
 
 ### Summary
@@ -58,11 +90,12 @@ Scenes/UI/game_over.gd/tscn        (restart screen)
 git status
 ```
 
-### Next (Fase 3)
-- Enemies: Quaternius Blob monsters (GreenBlob, Dog, Chicken)
-- Combat: melee attack, contact damage
-- Upgrades: chest/coin/potion drops
+### Next (Fase 4)
 - Player model: Quaternius RPG characters
+- Enemy models: Quaternius Blob monsters
+- Combat polish: hit feedback, particles
+- Audio: SFX + music
+- Enemy health system (multi-hit)
 
 ### Git
 - Repo: `DungeonCrawler3D` (public)
