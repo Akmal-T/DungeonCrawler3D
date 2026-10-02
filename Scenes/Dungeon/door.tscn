@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://bdoor_scene001"]
+
+[ext_resource type="Script" path="res://Scenes/Dungeon/door.gd" id="1_door"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_door"]
+size = Vector3(2.0, 3.0, 2.0)
+
+[node name="Door" type="Area3D"]
+script = ExtResource("1_door")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("BoxShape3D_door")
