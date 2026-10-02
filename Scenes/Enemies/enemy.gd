@@ -87,6 +87,9 @@ func _attack_player() -> void:
 		_anim.play("Bite_Front")
 	if _anim:
 		_anim.queue("Idle")
+	# Thorns: player merefleksikan damage ke penyerang
+	if GameManager.stats.thorns > 0 and not _is_dying:
+		take_damage(GameManager.stats.thorns)
 
 ## Dipanggil player saat menyerang.
 func take_damage(amount: int) -> void:

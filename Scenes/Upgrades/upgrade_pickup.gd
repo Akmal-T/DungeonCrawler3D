@@ -52,10 +52,10 @@ func _apply_upgrade() -> void:
 		"health_potion":
 			GameManager.heal_player(value)
 		"speed_boost":
-			GameManager.player_speed_multiplier = min(GameManager.player_speed_multiplier + 0.1, 2.0)
+			GameManager.stats.bonus_speed_mult += 0.1
 		"damage_boost":
-			GameManager.player_damage += value * 0.5
+			GameManager.stats.bonus_damage += value * 0.5
 		"max_health":
-			GameManager.player_max_health += value
+			GameManager.stats.bonus_max_health += value
 			GameManager.heal_player(value)
 	GameManager.add_upgrade(upgrade_type)
