@@ -11,13 +11,17 @@ extends CharacterBody3D
 
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _mesh_root: Node3D = $MeshRoot
+@onready var _anim: AnimationPlayer = $MeshRoot/Warrior/AnimationPlayer
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 var _last_attack_time: float = 0.0
 var _is_attacking: bool = false
+var _current_anim: String = ""
 
 func _ready() -> void:
-	pass
+	if _anim:
+		_play_anim("Idle")
+		_anim.animation_finished.connect(_on_anim_finished)
 
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
@@ -27,6 +31,15 @@ func _physics_process(delta: float) -> void:
 	_check_fall_out()
 	if Input.is_action_just_pressed("attack"):
 		_try_attack()
+
+func _play_anim(name: String) -> void:
+	if _anim == null:
+		return
+	if _current_anim == name and _anim.is_playing():
+		return
+	_current_anim = name
+	if _anim.has_animation(name):
+		_anim.play(name)
 
 func _check_fall_out() -> void:
 	# Jika jatuh terlalu jauh (keluar dungeon), restart level
@@ -45,6 +58,8 @@ func _handle_movement(delta: float) -> void:
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	if input_dir.length() < 0.01:
 		_decelerate(delta)
+		if not _is_attacking:
+			_play_anim("Idle")
 		return
 
 	# Arah gerak relatif terhadap rotasi kamera
@@ -63,6 +78,8 @@ func _handle_movement(delta: float) -> void:
 	velocity.z = move_toward(velocity.z, target_velocity.z, acceleration * delta)
 
 	_face_direction(direction, delta)
+	if not _is_attacking:
+		_play_anim("Run")
 
 func _decelerate(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, friction * delta)
@@ -78,6 +95,7 @@ func _try_attack() -> void:
 	if _last_attack_time + attack_cooldown > _now():
 		return  # cooldown aktif
 	_last_attack_time = _now()
+	_is_attacking = true
 	_do_attack()
 
 func _do_attack() -> void:
@@ -89,6 +107,9 @@ func _do_attack() -> void:
 	# Face the attack direction
 	var target_angle := atan2(cam_forward.x, cam_forward.z)
 	_mesh_root.rotation.y = target_angle
+	
+	if _anim:
+		_play_anim("Sword_Attack")
 	
 	# Cari musuh terdekat dalam radius serangan di depan player
 	var attack_center := global_position + cam_forward * (attack_range * 0.5) + Vector3(0, 1, 0)
@@ -108,9 +129,16 @@ func _do_attack() -> void:
 		var dot: float = to_enemy.normalized().dot(cam_forward)
 		if dot < 0.3:
 			continue  # musuh tidak di depan player
-		if enemy.has_method("die"):
+		if enemy.has_method("take_damage"):
+			enemy.take_damage(int(GameManager.player_damage))
+			hit_any = true
+		elif enemy.has_method("die"):
 			enemy.die()
 			hit_any = true
+
+func _on_anim_finished(name: String) -> void:
+	if name == "Sword_Attack":
+		_is_attacking = false
 
 func _now() -> float:
 	return Time.get_ticks_msec() / 1000.0

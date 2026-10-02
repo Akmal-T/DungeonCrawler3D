@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://bplayer_scene01"]
+[gd_scene load_steps=6 format=3 uid="uid://bplayer_scene01"]
 
 [ext_resource type="Script" path="res://Scenes/Player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://Scenes/Player/camera_orbit.gd" id="2_camera"]
 [ext_resource type="Material" uid="uid://cplayer0mat001" path="res://Materials/player_mat.tres" id="3_mat"]
+[ext_resource type="PackedScene" path="res://Assets/Quaternius_RPG/RPG Characters - Nov 2020/glTF/Warrior.gltf" id="4_warrior"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.4
@@ -17,16 +18,8 @@ shape = SubResource("CapsuleShape3D_player")
 
 [node name="MeshRoot" type="Node3D" parent="."]
 
-[node name="Body" type="CSGCylinder3D" parent="MeshRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-radius = 0.4
-height = 1.8
-material = ExtResource("3_mat")
-
-[node name="Head" type="CSGSphere3D" parent="MeshRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-radius = 0.3
-material = ExtResource("3_mat")
+[node name="Warrior" parent="MeshRoot" instance=ExtResource("4_warrior")]
+transform = Transform3D(0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 0, 0)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)

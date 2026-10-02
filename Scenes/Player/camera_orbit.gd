@@ -17,10 +17,23 @@ extends Node3D
 var _target_yaw: float = 0.0
 var _target_pitch: float = deg_to_rad(-20.0)
 var _current_distance: float = 5.0
+var _shake_amount: float = 0.0
+var _shake_decay: float = 6.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_current_distance = base_distance
+	GameManager.player_hit.connect(_on_player_hit)
+	GameManager.enemy_hit.connect(_on_enemy_hit)
+
+func _on_player_hit() -> void:
+	shake(0.35)
+
+func _on_enemy_hit() -> void:
+	shake(0.12)
+
+func shake(amount: float) -> void:
+	_shake_amount = max(_shake_amount, amount)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -47,4 +60,12 @@ func _process(delta: float) -> void:
 	rotation.x = lerp_angle(rotation.x, _target_pitch, follow_speed * delta)
 
 	if is_instance_valid(_camera):
-		_camera.position = Vector3(0, camera_height, _current_distance)
+		var shake_offset := Vector3.ZERO
+		if _shake_amount > 0.01:
+			shake_offset = Vector3(
+				randf_range(-1.0, 1.0),
+				randf_range(-1.0, 1.0),
+				randf_range(-1.0, 1.0)
+			) * _shake_amount
+			_shake_amount = lerp(_shake_amount, 0.0, _shake_decay * delta)
+		_camera.position = Vector3(0, camera_height, _current_distance) + shake_offset

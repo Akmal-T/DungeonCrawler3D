@@ -6,6 +6,8 @@ signal level_completed
 signal health_changed(current_health, max_health)
 signal level_changed(new_level)
 signal score_changed(new_score)
+signal player_hit
+signal enemy_hit
 
 var current_level: int = 1
 var player_max_health: int = 100
@@ -33,6 +35,7 @@ func reset_game():
 func damage_player(amount: int):
 	player_current_health = max(0, player_current_health - amount)
 	health_changed.emit(player_current_health, player_max_health)
+	player_hit.emit()
 	if player_current_health <= 0:
 		player_died.emit()
 

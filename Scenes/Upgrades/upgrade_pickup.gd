@@ -3,51 +3,44 @@ extends Area3D
 
 @export var upgrade_type: String = "health_potion"
 @export var value: int = 20
+@export var pickup_scale: float = 0.8
 
 var _player: CharacterBody3D = null
+var _visual: Node3D = null
+var _bob_time: float = 0.0
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	_apply_visual()
 
+func _process(delta: float) -> void:
+	_bob_time += delta
+	if _visual:
+		_visual.rotation.y += delta * 1.5
+		var base_y := 0.6
+		_visual.position.y = base_y + sin(_bob_time * 2.5) * 0.15
+
 func _apply_visual() -> void:
+	var path = ""
 	match upgrade_type:
 		"health_potion":
-			var mesh = CSGSphere3D.new()
-			mesh.radius = 0.4
-			var mat = StandardMaterial3D.new()
-			mat.albedo_color = Color(1, 0.3, 0.3)
-			mat.emission_enabled = true
-			mat.emission = Color(1, 0.1, 0.1)
-			mesh.material = mat
-			add_child(mesh)
+			path = "res://Assets/Kenney_MiniDungeon/Models/GLB format/potion.glb"
 		"speed_boost":
-			var mesh = CSGSphere3D.new()
-			mesh.radius = 0.4
-			var mat = StandardMaterial3D.new()
-			mat.albedo_color = Color(0.3, 1, 0.3)
-			mat.emission_enabled = true
-			mat.emission = Color(0.1, 1, 0.1)
-			mesh.material = mat
-			add_child(mesh)
+			path = "res://Assets/Kenney_MiniDungeon/Models/GLB format/key.glb"
 		"damage_boost":
-			var mesh = CSGSphere3D.new()
-			mesh.radius = 0.4
-			var mat = StandardMaterial3D.new()
-			mat.albedo_color = Color(1, 0.8, 0.2)
-			mat.emission_enabled = true
-			mat.emission = Color(1, 0.6, 0.1)
-			mesh.material = mat
-			add_child(mesh)
+			path = "res://Assets/Kenney_MiniDungeon/Models/GLB format/coin.glb"
 		"max_health":
-			var mesh = CSGSphere3D.new()
-			mesh.radius = 0.4
-			var mat = StandardMaterial3D.new()
-			mat.albedo_color = Color(0.3, 0.3, 1)
-			mat.emission_enabled = true
-			mat.emission = Color(0.1, 0.1, 1)
-			mesh.material = mat
-			add_child(mesh)
+			path = "res://Assets/Kenney_MiniDungeon/Models/GLB format/chest.glb"
+	if path == "":
+		return
+	var scene = load(path)
+	if scene == null:
+		return
+	var mesh = scene.instantiate()
+	mesh.scale = Vector3(pickup_scale, pickup_scale, pickup_scale)
+	mesh.position.y = 0.6
+	add_child(mesh)
+	_visual = mesh
 
 func _on_body_entered(body: Node3D) -> void:
 	if body is CharacterBody3D and body.name == "Player":

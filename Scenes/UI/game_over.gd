@@ -12,6 +12,7 @@ func _on_player_died() -> void:
 	_level_reached_label.text = "Level Reached: %d" % GameManager.current_level
 	visible = true
 	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
