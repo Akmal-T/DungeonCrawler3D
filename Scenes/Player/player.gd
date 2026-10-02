@@ -5,15 +5,21 @@ extends CharacterBody3D
 @export var acceleration: float = 12.0
 @export var friction: float = 10.0
 @export var rotation_speed: float = 12.0
+@export var attack_range: float = 2.0
+@export var attack_cooldown: float = 0.5
 
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _mesh_root: Node3D = $MeshRoot
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
+var _last_attack_time: float = 0.0
+var _is_attacking: bool = false
 
 func _ready() -> void:
-	# Fallback: jika tidak berada di dalam world dungeon, spawn standar
 	pass
+
+func _process(delta: float) -> void:
+	_handle_attack(delta)
 
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
@@ -67,3 +73,24 @@ func _face_direction(direction: Vector3, delta: float) -> void:
 		return
 	var target_angle := atan2(direction.x, direction.z)
 	_mesh_root.rotation.y = lerp_angle(_mesh_root.rotation.y, target_angle, rotation_speed * delta)
+
+func _handle_attack(delta: float) -> void:
+	if Input.is_action_just_pressed("attack") and _last_attack_time + attack_cooldown < _now():
+		_do_attack()
+		_last_attack_time = _now()
+
+func _do_attack() -> void:
+	var space := get_world_3d().direct_space_state
+	var from := global_position + Vector3(0, 1, 0)
+	var to := from + (-_mesh_root.global_transform.basis.z) * attack_range
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.exclude = [self]
+	var result := space.intersect_ray(query)
+	if result.has("collider"):
+		var target = result.collider
+		if target.has_method("die"):
+			print("[Player] Hit enemy! Damage: ", GameManager.player_damage)
+			target.die()
+
+func _now() -> float:
+	return Time.get_ticks_msec() / 1000.0

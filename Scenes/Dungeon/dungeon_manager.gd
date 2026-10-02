@@ -2,6 +2,7 @@ extends Node3D
 ## DungeonManager: generates a grid of connected rooms per level.
 
 const DOOR_SCENE := preload("res://Scenes/Dungeon/door.tscn")
+const ENEMY_SCENE := preload("res://Scenes/Enemies/enemy.tscn")
 
 # Grid layout: 3x3 max
 const GRID_SIZE := 3
@@ -76,6 +77,7 @@ func _generate_dungeon(level: int) -> void:
 		var doors := _doors_for_cell(cell)
 		RoomBuilder.build_room(room_node, _room_size, doors)
 		_add_door_triggers(room_node, doors, cell == _exit_room)
+		_spawn_enemies(room_node, cell, level)
 		_room_nodes[cell] = room_node
 
 	# Pindahkan player ke ruangan start (tengah)
@@ -157,6 +159,26 @@ func _add_door_triggers(room_node: Node3D, doors: Dictionary, room_is_exit: bool
 			"west": door.position = Vector3(-half, 0, 0)
 		door.player_entered.connect(_on_door_entered)
 		room_node.add_child(door)
+
+func _spawn_enemies(room_node: Node3D, room_cell: Vector2i, level: int) -> void:
+	# Skip spawn di start room dan exit room
+	if room_cell == _rooms[0] or room_cell == _exit_room:
+		return
+
+	# Enemy count: 1 + (level-1)/2
+	var enemy_count: int = 1 + (level - 1) / 2
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	for i in enemy_count:
+		var enemy := ENEMY_SCENE.instantiate()
+		enemy.speed = 2.0 + (level * 0.2)
+		enemy.damage = 10 + (level * 2)
+		enemy.position = Vector3(
+			rng.randf_range(-_room_size / 2.0 + 2, _room_size / 2.0 - 2),
+			0.5,
+			rng.randf_range(-_room_size / 2.0 + 2, _room_size / 2.0 - 2)
+		)
+		room_node.add_child(enemy)
 
 func _pick_exit_direction(doors: Dictionary) -> String:
 	# Pilih arah pintu pertama yang aktif sebagai exit
