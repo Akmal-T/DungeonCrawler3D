@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://blade_wave_sc01"]
+
+[ext_resource type="Script" path="res://Scenes/Projectiles/blade_wave.gd" id="1_blade"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_blade"]
+radius = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blade"]
+albedo_color = Color(0.3, 0.6, 1, 1)
+emission_enabled = true
+emission = Color(0.4, 0.8, 1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="QuadMesh" id="QuadMesh_blade"]
+size = Vector2(0.8, 0.8)
+
+[node name="BladeWave" type="Area3D"]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_blade")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_blade")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_blade")
+mesh = SubResource("QuadMesh_blade")

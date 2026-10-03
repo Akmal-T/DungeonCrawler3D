@@ -168,22 +168,21 @@ func _try_attack() -> void:
 	_do_attack()
 
 func _do_attack() -> void:
-	# Serang ke arah kamera menghadap (bukan arah badan) - lebih intuitif di third-person
 	var cam_forward := -_camera_pivot.global_transform.basis.z
 	cam_forward.y = 0
 	cam_forward = cam_forward.normalized()
 	
-	# Face the attack direction
 	var target_angle := atan2(cam_forward.x, cam_forward.z)
 	_mesh_root.rotation.y = target_angle
 	
 	if _anim:
 		_play_anim("Sword_Attack")
 	
-	# Cari musuh terdekat dalam radius serangan di depan player
 	var attack_center := global_position + cam_forward * (attack_range * 0.5) + Vector3(0, 1, 0)
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var hit_any := false
+	var hit_enemies: Array = []
+	
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
 			continue
@@ -197,15 +196,23 @@ func _do_attack() -> void:
 			continue
 		var dot: float = to_enemy.normalized().dot(cam_forward)
 		if dot < 0.3:
-			continue  # musuh tidak di depan player
+			continue
 		if enemy.has_method("take_damage"):
 			var dmg_roll := GameManager.stats.roll_damage(GameManager.player_current_health, GameManager.stats.max_health())
 			enemy.take_damage(int(dmg_roll.damage))
 			GameManager.apply_lifesteal(dmg_roll.damage)
 			hit_any = true
+			hit_enemies.append(enemy_3d)
 		elif enemy.has_method("die"):
 			enemy.die()
 			hit_any = true
+			hit_enemies.append(enemy_3d)
+	
+	if GameManager.stats.cleave_radius > 0.0 and hit_enemies.size() > 0:
+		_apply_cleave(attack_center, hit_enemies)
+	
+	if GameManager.stats.projectile_enabled:
+		_spawn_projectile(attack_center, cam_forward)
 
 func _on_anim_finished(name: String) -> void:
 	if name == "Sword_Attack":
@@ -213,3 +220,37 @@ func _on_anim_finished(name: String) -> void:
 
 func _now() -> float:
 	return Time.get_ticks_msec() / 1000.0
+
+func _apply_cleave(center: Vector3, hit_enemies: Array) -> void:
+	var enemies := get_tree().get_nodes_in_group("enemies")
+	for enemy in enemies:
+		if not is_instance_valid(enemy):
+			continue
+		var enemy_3d := enemy as Node3D
+		if enemy_3d == null:
+			continue
+		var to_enemy := enemy_3d.global_position - center
+		to_enemy.y = 0
+		if to_enemy.length() <= GameManager.stats.cleave_radius:
+			var already_hit := false
+			for h in hit_enemies:
+				if h == enemy_3d:
+					already_hit = true
+					break
+			if not already_hit:
+				var dmg_roll := GameManager.stats.roll_damage(GameManager.player_current_health, GameManager.stats.max_health())
+				enemy_3d.take_damage(int(dmg_roll.damage))
+
+func _spawn_projectile(center: Vector3, direction: Vector3) -> void:
+	var proj_scene := load("res://Scenes/Projectiles/blade_wave.tscn")
+	if proj_scene == null:
+		return
+	var proj: Node = proj_scene.instantiate()
+	if proj == null:
+		return
+	get_tree().root.add_child(proj)
+	if proj is Node3D:
+		proj.global_position = center
+		proj.rotation.y = atan2(direction.x, direction.z)
+	if proj.has_method("setup"):
+		proj.setup(direction, GameManager.stats)

@@ -135,6 +135,35 @@ func _run():
 		_ok(us.has_method("_show_selection"), "Has _show_selection method")
 		_ok(not us.visible, "Hidden at start")
 
+	# --- Cleave & Projectile ---
+	_print_header("Cleave & Projectile")
+	var player2 = world.get_node_or_null("Player")
+	_ok(player2 != null and player2.has_method("_apply_cleave"), "Player has _apply_cleave")
+	_ok(player2 != null and player2.has_method("_spawn_projectile"), "Player has _spawn_projectile")
+	# Projectile scene loads
+	var proj_scene = load("res://Scenes/Projectiles/blade_wave.tscn")
+	_ok(proj_scene != null, "blade_wave.tscn loads")
+	if proj_scene:
+		var proj = proj_scene.instantiate()
+		_ok(proj.has_method("setup"), "Projectile has setup()")
+		_ok(proj.get("speed") != null, "Projectile has speed property")
+		proj.queue_free()
+	# Cleave stat applies
+	GameManager.stats.reset()
+	GameManager.stats.cleave_radius = 0.0
+	for upg in UpgradePool.get_all():
+		if upg.id == "cleave":
+			GameManager.apply_upgrade(upg)
+			break
+	_ok(GameManager.stats.cleave_radius > 0.0, "Cleave upgrade sets radius (got %.1f)" % GameManager.stats.cleave_radius)
+	# Projectile stat applies
+	for upg in UpgradePool.get_all():
+		if upg.id == "projectile":
+			GameManager.apply_upgrade(upg)
+			break
+	_ok(GameManager.stats.projectile_enabled, "Projectile upgrade enables flag")
+	GameManager.stats.reset()
+
 	# --- Summary ---
 	print("\n" + "=".repeat(50))
 	print("RESULT: %d passed, %d failed" % [_passed, _failed])
