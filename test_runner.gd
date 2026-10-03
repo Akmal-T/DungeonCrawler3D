@@ -58,7 +58,7 @@ func _run_all():
 	if enemies.size() > 0:
 		var e = enemies[0]
 		var hp0 = e.get("_current_health")
-		e.take_damage(int(GameManager.player_damage))
+		e.take_damage(int(GameManager.get_player_damage()))
 		await get_tree().process_frame
 		var hp1 = e.get("_current_health")
 		_ok(hp1 < hp0, "Enemy took damage (%s -> %s)" % [hp0, hp1])
@@ -91,9 +91,9 @@ func _run_all():
 	_print_header("Game Over")
 	for e in get_tree().get_nodes_in_group("enemies"):
 		e.set_physics_process(false)
-	GameManager.player_current_health = GameManager.player_max_health
+	GameManager.player_current_health = GameManager.get_player_max_health()
 	await get_tree().process_frame
-	GameManager.damage_player(GameManager.player_max_health + 50)
+	GameManager.damage_player(GameManager.get_player_max_health() + 50)
 	await get_tree().process_frame
 	_ok(GameManager.player_current_health == 0, "HP reached 0 (got %d)" % GameManager.player_current_health)
 	var died_signal = [false]

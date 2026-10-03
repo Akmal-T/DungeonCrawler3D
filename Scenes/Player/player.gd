@@ -101,14 +101,14 @@ func _update_dash(delta: float) -> void:
 		velocity.x = 0.0
 		velocity.z = 0.0
 
-func _play_anim(name: String) -> void:
+func _play_anim(anim_name: String) -> void:
 	if _anim == null:
 		return
-	if _current_anim == name and _anim.is_playing():
+	if _current_anim == anim_name and _anim.is_playing():
 		return
-	_current_anim = name
-	if _anim.has_animation(name):
-		_anim.play(name)
+	_current_anim = anim_name
+	if _anim.has_animation(anim_name):
+		_anim.play(anim_name)
 
 func _check_fall_out() -> void:
 	# Jika jatuh terlalu jauh (keluar dungeon), restart level
@@ -180,7 +180,6 @@ func _do_attack() -> void:
 	
 	var attack_center := global_position + cam_forward * (attack_range * 0.5) + Vector3(0, 1, 0)
 	var enemies := get_tree().get_nodes_in_group("enemies")
-	var hit_any := false
 	var hit_enemies: Array = []
 	
 	for enemy in enemies:
@@ -201,11 +200,9 @@ func _do_attack() -> void:
 			var dmg_roll := GameManager.stats.roll_damage(GameManager.player_current_health, GameManager.stats.max_health())
 			enemy.take_damage(int(dmg_roll.damage))
 			GameManager.apply_lifesteal(dmg_roll.damage)
-			hit_any = true
 			hit_enemies.append(enemy_3d)
 		elif enemy.has_method("die"):
 			enemy.die()
-			hit_any = true
 			hit_enemies.append(enemy_3d)
 	
 	if GameManager.stats.cleave_radius > 0.0 and hit_enemies.size() > 0:
@@ -214,8 +211,8 @@ func _do_attack() -> void:
 	if GameManager.stats.projectile_enabled:
 		_spawn_projectile(attack_center, cam_forward)
 
-func _on_anim_finished(name: String) -> void:
-	if name == "Sword_Attack":
+func _on_anim_finished(anim_name: String) -> void:
+	if anim_name == "Sword_Attack":
 		_is_attacking = false
 
 func _now() -> float:

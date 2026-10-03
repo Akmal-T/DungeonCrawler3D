@@ -38,9 +38,9 @@ var projectile_damage_mult: float = 0.5
 func max_health() -> int:
 	return base_max_health + bonus_max_health
 
-func damage(current_health: int, max_health: int) -> float:
+func damage(c_h: int, m_h: int) -> float:
 	var dmg := base_damage + bonus_damage
-	if low_hp_damage_boost > 0.0 and current_health < max_health * 0.3:
+	if low_hp_damage_boost > 0.0 and c_h < m_h * 0.3:
 		dmg *= (1.0 + low_hp_damage_boost)
 	return dmg
 
@@ -57,8 +57,8 @@ func crit_multiplier() -> float:
 	return crit_damage
 
 ## Roll a damage value with crit applied. Returns {damage, is_crit}
-func roll_damage(current_health: int, max_health: int, override_base: float = -1.0) -> Dictionary:
-	var dmg := damage(current_health, max_health) if override_base < 0.0 else override_base
+func roll_damage(c_h: int, m_h: int, override_base: float = -1.0) -> Dictionary:
+	var dmg := damage(c_h, m_h) if override_base < 0.0 else override_base
 	var is_crit := randf() < crit_chance
 	if is_crit:
 		dmg *= crit_damage

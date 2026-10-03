@@ -5,7 +5,6 @@ extends Area3D
 @export var value: int = 20
 @export var pickup_scale: float = 0.8
 
-var _player: CharacterBody3D = null
 var _visual: Node3D = null
 var _bob_time: float = 0.0
 
@@ -58,4 +57,3 @@ func _apply_upgrade() -> void:
 		"max_health":
 			GameManager.stats.bonus_max_health += value
 			GameManager.heal_player(value)
-	GameManager.add_upgrade(upgrade_type)

@@ -1,9 +1,6 @@
 extends Node
 ## GameManager singleton — state global game.
 
-const PlayerStats = preload("res://Scripts/player_stats.gd")
-const UpgradePool = preload("res://Scripts/upgrade_pool.gd")
-
 signal player_died
 signal level_completed
 signal health_changed(current_health, max_health)

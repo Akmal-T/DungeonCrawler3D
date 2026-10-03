@@ -11,10 +11,10 @@ static var _cache: Dictionary = {}
 # Ukuran pintu (lebar lorong) dalam tile
 const DOOR_WIDTH := 2
 
-static func _get_scene(name: String) -> PackedScene:
-	if not _cache.has(name):
-		_cache[name] = load(ASSET_DIR + name + ".glb")
-	return _cache[name]
+static func _get_scene(asset_name: String) -> PackedScene:
+	if not _cache.has(asset_name):
+		_cache[asset_name] = load(ASSET_DIR + asset_name + ".glb")
+	return _cache[asset_name]
 
 ## Membangun ruangan lengkap di dalam node parent.
 ## room_size: ukuran dalam tile (mis. 12 = 12x12)
@@ -81,7 +81,7 @@ static func _build_walls(parent: Node3D, room_size: int, doors: Dictionary) -> v
 
 	var half := room_size / 2.0
 	var door_center := room_size / 2  # index tengah
-	var door_half := DOOR_WIDTH / 2
+	var door_half := DOOR_WIDTH / 2.0
 
 	# Setiap sisi: iterate dari -half..half
 	for i in room_size:

@@ -16,7 +16,6 @@ var _anim: AnimationPlayer = null
 var _last_attack_time: float = 0.0
 var _current_health: int = 30
 var _is_dying: bool = false
-var _hit_flash_time: float = 0.0
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
@@ -123,18 +122,18 @@ func die() -> void:
 	else:
 		queue_free()
 
-func _on_death_anim_finished(_name: String) -> void:
+func _on_death_anim_finished(_anim_name: String) -> void:
 	queue_free()
 
-func _play_anim(name: String) -> void:
+func _play_anim(anim_name: String) -> void:
 	if _anim == null:
 		return
-	if not _anim.has_animation(name):
+	if not _anim.has_animation(anim_name):
 		return
 	var current = _anim.get_current_animation()
-	if current == name and _anim.is_playing():
+	if current == anim_name and _anim.is_playing():
 		return
-	_anim.play(name)
+	_anim.play(anim_name)
 
 func _flash_hit() -> void:
 	# Efek kedip cepat: perbesar sedikit mesh sebagai feedback

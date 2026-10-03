@@ -166,7 +166,7 @@ func _spawn_enemies(room_node: Node3D, room_cell: Vector2i, level: int) -> void:
 		return
 
 	# Enemy count: 1 + (level-1)/2
-	var enemy_count: int = 1 + (level - 1) / 2
+	var enemy_count: int = 1 + ((level - 1) / 2)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	for i in enemy_count:

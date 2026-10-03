@@ -23,7 +23,8 @@ func _show_selection() -> void:
 	if _choices.size() == 0:
 		return
 	
-	# Fill button text
+	_title.text = "Level Up! Choose Upgrade:"
+	
 	_btn1.text = ""
 	_btn2.text = ""
 	_btn3.text = ""
