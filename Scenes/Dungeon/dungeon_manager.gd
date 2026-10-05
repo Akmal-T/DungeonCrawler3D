@@ -8,6 +8,33 @@ const ENEMY_SCENE := preload("res://Scenes/Enemies/enemy.tscn")
 const GRID_SIZE := 3
 const TILE_SIZE := 1.0
 
+# ===== WALL CONFIG (tweak from Inspector) =====
+@export_category("Dungeon Visual")
+@export_group("Wall")
+@export_range(0.0, 10.0, 0.1) var wall_height: float = 6.0
+@export_range(0.0, 2.0, 0.01) var wall_scale_xz: float = 1.0
+@export_range(0.0, 5.0, 0.01) var wall_collision_height: float = 6.6
+@export_range(0.0, 5.0, 0.1) var wall_collision_thickness: float = 0.3
+
+@export_group("Door")
+@export_range(0.0, 10.0, 0.1) var door_height: float = 6.0
+@export_range(0.0, 2.0, 0.01) var door_scale_xz: float = 1.0
+
+@export_group("Column")
+@export_range(0.0, 10.0, 0.1) var column_height: float = 6.0
+
+@export_group("Lighting")
+@export_range(0.0, 10.0, 0.1) var room_light_height: float = 4.0
+@export_range(0.0, 10.0, 0.1) var room_light_range: float = 18.0
+@export var room_light_energy: float = 2.0
+@export var room_light_color: Color = Color(1.0, 0.9, 0.75)
+@export_range(0.0, 10.0, 0.1) var room_light_attenuation: float = 1.0
+@export var room_light_shadow: bool = false
+
+@export_group("Props")
+@export_range(0, 10) var props_min_count: int = 0
+@export_range(0, 10) var props_max_count: int = 3
+
 # Room size per level (in tiles)
 func _room_size_for_level(level: int) -> int:
 	return clampi(10 + (level - 1) * 2, 10, 16)
@@ -36,7 +63,7 @@ func setup(player: CharacterBody3D) -> void:
 
 func _create_fade_overlay() -> void:
 	var canvas := CanvasLayer.new()
-	canvas.layer = 100
+	canvas.layer = 99
 	add_child(canvas)
 	_fade = ColorRect.new()
 	_fade.color = Color(0, 0, 0, 0)
@@ -69,13 +96,14 @@ func _generate_dungeon(level: int) -> void:
 	_find_exit_room()
 
 	# Bangun tiap ruangan
+	var visual_config := _get_visual_config()
 	for cell in _rooms:
 		var room_node := Node3D.new()
 		room_node.name = "Room_%d_%d" % [cell.x, cell.y]
 		room_node.position = _cell_to_world(cell)
 		add_child(room_node)
 		var doors := _doors_for_cell(cell)
-		RoomBuilder.build_room(room_node, _room_size, doors)
+		RoomBuilder.build_room(room_node, _room_size, doors, visual_config)
 		_add_door_triggers(room_node, doors, cell == _exit_room)
 		_spawn_enemies(room_node, cell, level)
 		_room_nodes[cell] = room_node
@@ -83,6 +111,25 @@ func _generate_dungeon(level: int) -> void:
 	# Pindahkan player ke ruangan start (tengah)
 	var start_cell := _rooms[0]
 	_player.global_position = _cell_to_world(start_cell) + Vector3(0, 2, 0)
+
+func _get_visual_config() -> Dictionary:
+	return {
+		"wall_height": wall_height,
+		"wall_scale_xz": wall_scale_xz,
+		"wall_collision_height": wall_collision_height,
+		"wall_collision_thickness": wall_collision_thickness,
+		"door_height": door_height,
+		"door_scale_xz": door_scale_xz,
+		"column_height": column_height,
+		"room_light_height": room_light_height,
+		"room_light_range": room_light_range,
+		"room_light_energy": room_light_energy,
+		"room_light_color": room_light_color,
+		"room_light_attenuation": room_light_attenuation,
+		"room_light_shadow": room_light_shadow,
+		"props_min_count": props_min_count,
+		"props_max_count": props_max_count,
+	}
 
 func _generate_layout(count: int) -> void:
 	var center := Vector2i(GRID_SIZE / 2, GRID_SIZE / 2)
@@ -201,8 +248,13 @@ func _transition_to_next_level() -> void:
 	tween.tween_property(_fade, "color:a", 1.0, FADE_TIME)
 	await tween.finished
 
-	# Naik level & regenerate
+	# Naik level (emit level_completed, trigger upgrade UI)
 	GameManager.next_level()
+	
+	# Tunggu upgrade dipilih (atau skip kalau tidak ada)
+	await GameManager.upgrade_applied
+	
+	# Generate dungeon baru
 	_generate_dungeon(GameManager.current_level)
 
 	# Fade in

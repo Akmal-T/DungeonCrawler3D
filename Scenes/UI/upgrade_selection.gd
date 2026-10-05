@@ -21,6 +21,7 @@ func _on_level_completed() -> void:
 func _show_selection() -> void:
 	_choices = UpgradePool.get_random_choices(3, GameManager.upgrades_taken)
 	if _choices.size() == 0:
+		GameManager.upgrade_applied.emit("")
 		return
 	
 	_title.text = "Level Up! Choose Upgrade:"
