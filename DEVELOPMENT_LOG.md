@@ -1,5 +1,38 @@
 # Development Log
 
+## 2026-10-05 — Fase 6: Polish & Inspector Config
+
+### Summary
+Fixed black screen transition bug, upgraded wall height to 6x, added room lighting, made projectile visible, and exposed all dungeon visual parameters to Godot Inspector.
+
+### What Works
+- Upgrade Selection UI properly visible during level transition (layer 101 over layer 99 fade)
+- Await `upgrade_applied` signal before generating new dungeon
+- Wall height 6x (player cannot jump over)
+- Door frame visual (`wall-opening.glb`) in doorway gaps
+- `OmniLight3D` per room for warm, even interior lighting
+- Blade Wave projectile visual (3D glowing cyan sphere)
+- All visual parameters editable in Godot Inspector (`DungeonManager` node)
+
+### Inspector Config Exposed
+- Wall: height (6.0), scale_xz (1.0), collision_height (6.6), collision_thickness (0.3)
+- Door: height (6.0), scale_xz (1.0)
+- Column: height (6.0)
+- Lighting: height (4.0), range (18.0), energy (2.0), color, attenuation, shadow (false)
+- Props: min_count (0), max_count (3)
+
+### Files Modified
+```
+Scenes/Dungeon/dungeon_manager.gd (Inspector export vars + visual config pass)
+Scenes/Dungeon/world.tscn         (DirectionalLight & WorldEnvironment tuning)
+Scenes/Projectiles/blade_wave.tscn(SphereMesh + bright cyan emission)
+Scenes/UI/upgrade_selection.gd    (Fallback emit if choices empty)
+Scenes/UI/upgrade_selection.tscn  (Layer = 101)
+Scripts/room_builder.gd           (Config-driven room building)
+```
+
+---
+
 ## 2026-10-03 — Fase 3: Enemies & Combat
 
 ### Summary

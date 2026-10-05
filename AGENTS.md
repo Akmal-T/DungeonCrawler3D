@@ -9,7 +9,108 @@
 
 ---
 
-## Current Status (Last updated: 2026-10-03)
+## Current Status (Last updated: 2026-10-05)
+
+### ✅ Completed: Fase 2 — Dungeon Room System (MVP)
+
+**Core Systems Working:**
+- **Player:** Third-person orbit camera (Zelda-style), WASD movement, jump, gravity, placeholder capsule mesh
+- **Dungeon Generation:** Grid-based random walk (3x3 max), procedural room layout per level, difficulty scaling (room count + size)
+- **Room Building:** Kenney Mini Dungeon tiles (floor, wall, column, props), programmatic generation via `room_builder.gd`
+- **Door System:** Normal doors (explore between rooms) + Exit door (1 per dungeon, red glow + gate.glb, triggers level transition with fade)
+- **Level Transition:** Fade black → next level → regenerate dungeon → fade in
+- **UI:** HUD (level, score, HP bar), Game Over screen (restart button)
+- **Game Loop:** Die → Game Over → Restart to Level 1
+
+### ✅ Completed: Fase 3 — Enemies & Combat
+
+**New Systems:**
+- **Enemy AI** (`enemy.gd`): CharacterBody3D, chase player within detection_range (15), contact damage
+- **Enemy Spawning:** Spawn in non-start/non-exit rooms, count = `1 + (level-1)/2`, speed/damage scale with level
+- **Player Melee Attack** (`player.gd`): Group-based detection, raycast 2 units forward from facing direction, mouse click triggers, 0.5s cooldown, calls `enemy.die()`
+- **Upgrade Pickups** (`upgrade_pickup.gd`): 4 types — health_potion (heal 20), speed_boost (+0.1x), damage_boost (+5), max_health (+20)
+- **Enemy Drops:** On death, spawn upgrade pickup at enemy position
+- **Player Group:** Player tagged in "player" group for enemy targeting
+- **Enemy Visual:** Red emissive sphere (placeholder, replace with Quaternius Blob later)
+
+**Combat Loop:**
+1. Enemy detects player within 15 units → chases
+2. Within 1.5 units → attacks (damage = 10 + level*2, 0.5s delay)
+3. Player clicks mouse → raycast hits enemy → enemy dies → drops pickup
+4. Player walks over pickup → applies buff
+
+**Assets Imported:**
+- ✅ Kenney Mini Dungeon (30 GLB models: wall, floor, gate, column, barrel, pot, chest, etc.)
+- ✅ Quaternius Ultimate Monsters (54 GLTF: Blob/Big/Flying categories) — **available, currently enemy uses placeholder sphere**
+- ✅ Quaternius RPG Characters (6 GLTF: Warrior, Ranger, Wizard, etc.) — **ready for player upgrade**
+
+### ✅ Completed: Fase 4 — Visual Upgrade & Polish
+
+**New Systems:**
+- **Player Model:** Quaternius RPG Warrior (ganti placeholder capsule)
+- **Enemy Models:** Quaternius Blob monsters (GreenBlob, Dog, Chicken) — available, currently enemy uses placeholder sphere
+- **Combat Polish:** Hit feedback (scale flash), animasi (Idle/Walk/Bite_Front/HitRecieve/Death)
+- **Upgrade Visual:** Kenney chest/coin/potion models — ready for swap
+
+**Visual Improvements:**
+- Wall height 6x tinggi (player tidak bisa loncat melewati)
+- Door frame visual (wall-opening.glb) di celah dinding
+- Room lighting (OmniLight3D) per ruangan, energi 2.0, warna hangat
+- Projectile Blade Wave: SphereMesh 0.6, scale 1.5x, emission 3.5x, warna biru cyan
+
+**Assets Imported:**
+- ✅ Kenney Mini Dungeon (wall-opening.glb untuk frame pintu)
+
+### ✅ Completed: Fase 5 — Player Growth & Progression
+
+**New Systems:**
+- **PlayerStats class** (`player_stats.gd`): 16 stat types + logic upgrade
+- **UpgradePool** (`upgrade_pool.gd`): 19 upgrade dengan rarity (common/rare/epic)
+- **Upgrade Selection UI** (`upgrade_selection.gd`): Tampil saat level up, pilih 1 dari 3
+- **Advanced Stats:**
+  - lifesteal, crit (chance & damage), regen
+  - shield (absorb damage, recharge tiap level)
+  - thorns (damage balik ke penyerang)
+  - cleave (area damage setelah hit)
+  - dash (invuln + speed boost, cooldown)
+  - low_hp_damage_boost, kill_speed_boost
+  - projectile (Blade Wave, 50% damage dari base)
+
+**Upgrade Types (19 total):**
+- Common: max_health, damage, speed, attack_speed, attack_range, heal_now
+- Rare: regen, lifesteal, crit_chance, crit_damage, shield, thorns, low_hp_damage, kill_speed, dash_master
+- Epic: cleave, projectile
+
+**Flow:**
+1. Player naik level → GameManager.next_level() emit `level_completed`
+2. UpgradeSelection UI muncul (CanvasLayer 101, di atas fade overlay layer 99)
+3. Player pilih 1 dari 3 upgrade random
+4. GameManager.apply_upgrade() → apply ke PlayerStats
+5. Dungeon regenerate → player lanjut ke level baru
+
+### ✅ Completed: Fase 6 — Polish & Inspector Config (2026-10-05)
+
+**New Systems:**
+- **Dungeon Visual Config:** Semua parameter dinding/pintu/column/lighting bisa diedit dari Godot Inspector tanpa edit kode
+- **Transition Fix:** Fade black sebelum upgrade UI muncul (await upgrade_applied signal)
+- **Project Visual:** Blade Wave sphere mesh + bright emission + transparency
+- **Lighting:** OmniLight3D per ruangan, ambient + directional light tuning
+- **Wall Height:** 6x (bisa di-tweak di Inspector)
+
+**Inspector Parameters (DungeonManager node):**
+```
+Wall: wall_height (6.0), wall_scale_xz (1.0), wall_collision_height (6.6), wall_collision_thickness (0.3)
+Door: door_height (6.0), door_scale_xz (1.0)
+Column: column_height (6.0)
+Lighting: room_light_height (4.0), room_light_range (18.0), room_light_energy (2.0), room_light_color, room_light_attenuation, room_light_shadow (false)
+Props: props_min_count (0), props_max_count (3)
+```
+
+**Fixes:**
+- UpgradeSelection UI tidak terlihat karena layer 101 di atas fade layer 99
+- Wall scale & collision box tidak sinkron (sekarang 6x)
+- Door frame tidak ada visual (sekarang pakai wall-opening.glb)
+- No lighting di dalam dungeon (sekarang ada OmniLight3D per ruangan)
 
 ### ✅ Completed: Fase 2 — Dungeon Room System (MVP)
 
@@ -119,13 +220,18 @@ D:\GAME\BuildingAGame\
 
 ---
 
-## Known Issues & Limitations (Fase 2)
+## Known Issues & Limitations
 
 ✅ **Verified Working:**
 - Dungeon generation (tested headless: "Generated level 1: 3 rooms, size 10")
 - Floor collision (player no longer falls through)
 - Exit door glow + visual marker
 - Fade transition smooth
+- Upgrade UI visible during transition (layer fix)
+- Wall height 6x (cannot jump over)
+- Room lighting (OmniLight3D per room)
+- Projectile visible (SphereMesh + emission)
+- Inspector-configurable dungeon visuals
 
 ⚠️ **Not Verified Visually (may need tuning):**
 - Wall rotation accuracy (0/90/180/270° — visual check needed in editor)
@@ -133,48 +239,25 @@ D:\GAME\BuildingAGame\
 - Props spawn position (may clip walls if unlucky RNG)
 
 ❌ **Not Yet Implemented:**
-- **Visual models** (enemies = placeholder sphere, player = placeholder capsule — real models ready)
 - **Audio** (no SFX/music)
 - **Minimap** (would be useful for dungeon exploration)
-- **Enemy health** (currently die in 1 hit — no HP bar)
 - **Multiple enemy types/tiers** (all enemies identical currently)
+- **Boss fights**
+- **Particles/VFX** (hit sparks, crit effect, death explosion, screen shake)
+- **Persistence** (save/load progress, high score)
 
 ---
 
-## Next Steps (Fase 3 — Enemies & Combat) — ✅ COMPLETED
+## Next Steps (Fase 7 — Content & Polish)
 
 **Plan:**
-1. **Enemy AI:**
-   - Use Quaternius Blob monsters (GreenBlob, Dog, Chicken) as tier 1
-   - Simple chase AI (NavMesh or direct pathfinding)
-   - Spawn enemies in rooms (not start room, not exit room)
-   - Die → drop upgrade pickup
-
-2. **Combat System:**
-   - Player melee attack (short-range raycast or Area3D hitbox)
-   - Enemy contact damage (on collision with player)
-   - Health system (already in GameManager, connect to damage)
-   - Hit feedback (screen shake, particle, sound)
-
-3. **Upgrade Drops:**
-   - Use Kenney chest/coin/potion models
-   - Buff types: speed+, damage+, HP+, max HP+
-   - Pickup Area3D → apply buff → destroy
-
-4. **Difficulty Scaling:**
-   - Enemy count per room: `1 + level / 2`
-   - Enemy HP/damage scaling: `base * (1 + level * 0.2)`
-
----
-
-## Next Steps (Fase 4 — Polish & Visual Upgrade)
-
-**Plan:**
-1. **Player Model:** Replace placeholder capsule dengan Quaternius RPG (Warrior/Wizard)
-2. **Enemy Models:** Replace red sphere dengan Quaternius Blob (GreenBlob, Dog, Chicken)
-3. **Combat Polish:** Add hit feedback (screen shake, particles), sound SFX
-4. **Pickups:** Replace sphere dengan Kenney chest/coin/potion models
-5. **Audio:** Sound manager + SFX for footsteps, hits, pickup
+1. **Audio:** Sound manager + SFX (footsteps, hits, pickup, level up) + BGM
+2. **Enemy Variety:** Multiple tiers (Blob/Big/Flying), ranged enemies, elite variants
+3. **Boss Fights:** Boss room, unique mechanics, special rewards
+4. **Minimap:** Dungeon navigation UI
+5. **VFX:** Particles (hit sparks, crit effect, death explosion), screen shake
+6. **Balancing:** Enemy HP/damage curve, upgrade value tuning
+7. **Persistence:** Save/load progress, high score
 
 ---
 
